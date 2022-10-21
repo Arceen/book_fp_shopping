@@ -37,6 +37,12 @@ class MyApp extends StatelessWidget {
                 },
                 child: Text("Delete All Items"),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  dbHelper.readAllLists();
+                },
+                child: Text("Read List!"),
+              ),
             ],
           ),
         ),
