@@ -34,12 +34,16 @@ class DbHelper {
 
   Future<bool> insertList(ShoppingList list) async {
     db = await openDb();
-    return await db!.insert(LIST_TABLE, list.toMap()) != 0;
+    return await db!.insert(LIST_TABLE, list.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace) !=
+        0;
   }
 
   Future<bool> insertItem(ListItem item) async {
     db = await openDb();
-    return await db!.insert(ITEM_TABLE, item.toMap()) != 0;
+    return await db!.insert(ITEM_TABLE, item.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace) !=
+        0;
   }
 
   Future testDb() async {
@@ -94,14 +98,22 @@ class DbHelper {
     }
   }
 
-  Future<List<ShoppingList>> readAllLists() async {
+  Future<List<ShoppingList>> getLists() async {
     db = await openDb();
-    List<Map> maps = await db!.query(LIST_TABLE);
-    print(maps.toList(growable: false).runtimeType);
-    return [];
+    List<Map<String, dynamic>> maps = await db!.query(LIST_TABLE);
+    final myList = maps.toList(growable: false).map((list) => ShoppingList(
+        id: list['id'], name: list['name'], priority: list['priority']));
+    print(myList);
+    return myList.toList();
   }
 
-  Future<ShoppingList> readSingleList(int id) {
-    throw UnimplementedError();
+  Future<ShoppingList> getSingleList(int id) async {
+    db = await openDb();
+    List<Map> maps =
+        await db!.query(LIST_TABLE, where: 'id = ?', whereArgs: [id]);
+    final myList = maps.toList(growable: false).map((list) => ShoppingList(
+        id: list['id'], name: list['name'], priority: list['priority']));
+    print(myList);
+    return myList.toList()[0];
   }
 }

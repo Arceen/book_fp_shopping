@@ -9,4 +9,8 @@ class ShoppingList {
         'name': name,
         'priority': priority,
       };
+  @override
+  String toString() {
+    return 'ID: $id - Name: $name - Priority: $priority';
+  }
 }
