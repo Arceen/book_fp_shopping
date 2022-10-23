@@ -12,19 +12,28 @@ class DbHelper {
   final String dbCreateItemsTable = """
     CREATE TABLE items(id INTEGER PRIMARY KEY, idList INTEGER, name TEXT, quantity TEXT, note TEXT, FOREIGN KEY(idList) REFERENCES lists(id))
 """;
+
   final int version = 1;
   Database? db;
-
-  Future<Database> openDb() async {
-    db = db ??
-        await openDatabase(join(await getDatabasesPath(), 'shopping.db'),
-            onCreate: (db, version) {
-          db.execute(dbCreateListTable);
-          db.execute(dbCreateItemsTable);
-        }, version: version);
-
-    return db!;
+  static final DbHelper _dbHelper = DbHelper._internal();
+  DbHelper._internal();
+  factory DbHelper() {
+    return _dbHelper;
   }
+
+  Future deleteList(ShoppingList list) async {
+    db = await openDb();
+    await db!.delete(ITEM_TABLE, where: "idList = ?", whereArgs: [list.id]);
+    await db!.delete(LIST_TABLE, where: "id = ?", whereArgs: [list.id]);
+  }
+
+  Future<Database> openDb() async =>
+      db ??
+      await openDatabase(join(await getDatabasesPath(), 'shopping.db'),
+          onCreate: (db, version) {
+        db.execute(dbCreateListTable);
+        db.execute(dbCreateItemsTable);
+      }, version: version);
 
   Future emptyTestDb() async {
     db = await openDb();

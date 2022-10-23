@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopping/helpers/dbhelper.dart';
 import 'package:shopping/ui/items_screen.dart';
+import './ui/shopping_list_dialog.dart';
 
 import 'models/list_items.dart';
 import 'models/shopping_list.dart';
@@ -19,14 +20,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Shopping List',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Center(
-            child: Text('Shopping List'),
-          ),
-        ),
-        body: const Shopping(),
-      ),
+      home: const Shopping(),
     );
   }
 }
@@ -41,10 +35,25 @@ class Shopping extends StatefulWidget {
 class _ShoppingState extends State<Shopping> {
   DbHelper helper = DbHelper();
   List<ShoppingList>? shoppingList;
+  late ShoppingListDialog dialog;
+
+  @override
+  void initState() {
+    dialog = ShoppingListDialog();
+    showData();
+    super.initState();
+  }
 
   Future showData() async {
     await helper.openDb();
-    if (shoppingList != null) return;
+    shoppingList = await helper.getLists();
+    setState(() {
+      shoppingList = shoppingList;
+    });
+  }
+
+  Future updateList() async {
+    await helper.openDb();
     shoppingList = await helper.getLists();
     setState(() {
       shoppingList = shoppingList;
@@ -53,17 +62,29 @@ class _ShoppingState extends State<Shopping> {
 
   @override
   Widget build(BuildContext context) {
-    showData();
-    return ListView.builder(
-      itemCount: shoppingList?.length ?? 0,
-      itemBuilder: (context, index) {
-        return ListTile(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Center(
+          child: Text('Shopping List'),
+        ),
+      ),
+      body: ListView.builder(
+        itemCount: shoppingList?.length ?? 0,
+        itemBuilder: (context, index) {
+          return ListTile(
             leading: CircleAvatar(
               child: Text(shoppingList![index].priority.toString()),
             ),
             title: Text(shoppingList![index].name),
             trailing: IconButton(
-              onPressed: () {},
+              onPressed: () async {
+                await showDialog(
+                  context: context,
+                  builder: (context) =>
+                      dialog.buildDialog(context, shoppingList![index], false),
+                );
+                updateList();
+              },
               icon: const Icon(Icons.edit),
             ),
             onTap: () {
@@ -73,8 +94,25 @@ class _ShoppingState extends State<Shopping> {
                   builder: (context) => ItemsScreen(shoppingList![index]),
                 ),
               );
-            });
-      },
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await showDialog(
+            context: context,
+            builder: (context) => dialog.buildDialog(
+              context,
+              ShoppingList(name: '', priority: 0),
+              true,
+            ),
+          );
+          updateList();
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.pink,
+      ),
     );
   }
 }

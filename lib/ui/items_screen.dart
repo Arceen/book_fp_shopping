@@ -39,9 +39,16 @@ class _ItemsScreenState extends State<ItemsScreen> {
         itemCount: listItems?.length ?? 0,
         itemBuilder: (context, index) {
           return ListTile(
-            leading: Center(child: Text(listItems![index].quantity)),
             title: Text(listItems![index].name),
-            subtitle: Text(listItems![index].note),
+            subtitle: Text(
+                'Quantity: ${listItems![index].quantity} - Note: ${listItems![index].note}'),
+            onTap: () {},
+            trailing: IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.edit,
+              ),
+            ),
           );
         },
       ),
