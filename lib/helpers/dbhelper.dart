@@ -27,6 +27,11 @@ class DbHelper {
     await db!.delete(LIST_TABLE, where: "id = ?", whereArgs: [list.id]);
   }
 
+  Future deleteItem(ListItem item) async {
+    db = await openDb();
+    await db!.delete(ITEM_TABLE, where: "id = ?", whereArgs: [item.id]);
+  }
+
   Future<Database> openDb() async =>
       db ??
       await openDatabase(join(await getDatabasesPath(), 'shopping.db'),

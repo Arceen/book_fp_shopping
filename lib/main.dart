@@ -71,30 +71,45 @@ class _ShoppingState extends State<Shopping> {
       body: ListView.builder(
         itemCount: shoppingList?.length ?? 0,
         itemBuilder: (context, index) {
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text(shoppingList![index].priority.toString()),
-            ),
-            title: Text(shoppingList![index].name),
-            trailing: IconButton(
-              onPressed: () async {
-                await showDialog(
-                  context: context,
-                  builder: (context) =>
-                      dialog.buildDialog(context, shoppingList![index], false),
-                );
-                updateList();
-              },
-              icon: const Icon(Icons.edit),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ItemsScreen(shoppingList![index]),
+          return Dismissible(
+            key: Key(shoppingList![index].name),
+            onDismissed: (direction) {
+              String strName = shoppingList![index].name;
+              helper.deleteList(shoppingList![index]);
+              setState(() {
+                shoppingList!.removeAt(index);
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("$strName deleted!"),
                 ),
               );
             },
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Text(shoppingList![index].priority.toString()),
+              ),
+              title: Text(shoppingList![index].name),
+              trailing: IconButton(
+                onPressed: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (context) => dialog.buildDialog(
+                        context, shoppingList![index], false),
+                  );
+                  updateList();
+                },
+                icon: const Icon(Icons.edit),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ItemsScreen(shoppingList![index]),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
