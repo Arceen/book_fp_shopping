@@ -103,7 +103,7 @@ class DbHelper {
     List<Map<String, dynamic>> maps = await db!.query(LIST_TABLE);
     final myList = maps.toList(growable: false).map((list) => ShoppingList(
         id: list['id'], name: list['name'], priority: list['priority']));
-    print(myList);
+    print(maps);
     return myList.toList();
   }
 
@@ -113,7 +113,24 @@ class DbHelper {
         await db!.query(LIST_TABLE, where: 'id = ?', whereArgs: [id]);
     final myList = maps.toList(growable: false).map((list) => ShoppingList(
         id: list['id'], name: list['name'], priority: list['priority']));
-    print(myList);
     return myList.toList()[0];
+  }
+
+  Future<List<ListItem>> getListItem(int id) async {
+    db = await openDb();
+    List<Map<String, dynamic>> maps2 = await db!.query(ITEM_TABLE);
+    print(maps2);
+    List<Map<String, dynamic>> maps =
+        await db!.query(ITEM_TABLE, where: 'idList = ?', whereArgs: [id]);
+    final myList = maps.toList(growable: false).map(
+          (list) => ListItem(
+              id: list['id'],
+              idList: list['idList'],
+              name: list['name'],
+              quantity: list['quantity'],
+              note: list['note']),
+        );
+    print(myList);
+    return myList.toList();
   }
 }

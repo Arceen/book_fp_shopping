@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopping/helpers/dbhelper.dart';
+import 'package:shopping/ui/items_screen.dart';
 
 import 'models/list_items.dart';
 import 'models/shopping_list.dart';
@@ -39,26 +40,41 @@ class Shopping extends StatefulWidget {
 
 class _ShoppingState extends State<Shopping> {
   DbHelper helper = DbHelper();
+  List<ShoppingList>? shoppingList;
 
   Future showData() async {
     await helper.openDb();
-    ShoppingList drinks = ShoppingList(name: 'drinks', priority: 4);
-    bool inserted = await helper.insertList(drinks);
-    print("Inserted drinks list");
-    final cola = ListItem(
-      idList: 1,
-      name: 'Coca-Cola',
-      quantity: 'ONLY 1',
-      note: 'My sister only drinks cola -_-',
-    );
-    inserted = await helper.insertItem(cola);
-    print("Inserted cola item");
+    if (shoppingList != null) return;
+    shoppingList = await helper.getLists();
+    setState(() {
+      shoppingList = shoppingList;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     showData();
-    helper.getLists();
-    return Container();
+    return ListView.builder(
+      itemCount: shoppingList?.length ?? 0,
+      itemBuilder: (context, index) {
+        return ListTile(
+            leading: CircleAvatar(
+              child: Text(shoppingList![index].priority.toString()),
+            ),
+            title: Text(shoppingList![index].name),
+            trailing: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.edit),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ItemsScreen(shoppingList![index]),
+                ),
+              );
+            });
+      },
+    );
   }
 }
